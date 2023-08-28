@@ -143,3 +143,4 @@ GitHub.sublime-settings
 *.tif
 logs*/
 .idea/
+*.sf
