@@ -8,9 +8,11 @@ from genes_names import GENES_LIST
 FNAME_OUT = "./PPMI_RNA.csv"
 FNAME_SPORADIC = "./PPMI_RNA_sporadic.csv"
 FNAME_HC = "./PPMI_RNA_healthy_controls.csv"
+FNAME_LOG = "./PPMI_RNA.txt"
 
 TPM_POS = 3
 FILE_DIR = "./"
+#FILE_REGEXT = "*.BL.*.genes.sf"
 FILE_REGEXT = "*.BL.*.genes.sf"
 FILE_REGISTRY = "./PPMI_Curated_Data_Cut_Public_20230612.csv"
 
@@ -52,6 +54,7 @@ def main():
     fout = open(FNAME_OUT, "w")
     fout_sporadic = open(FNAME_SPORADIC, "w")
     fout_hc = open(FNAME_HC, "w")
+    flog = open(FNAME_LOG, "w")
     file_regexp = os.path.join(FILE_DIR, FILE_REGEXT)
     file_list = list(glob(file_regexp))
     # print(file_list)
@@ -85,13 +88,14 @@ def main():
     npat = 0
     for fname in file_list:
         nf = nf + 1
-        print("Num files: {} ".format(nf), end="")
+        print(fname, file=flog)
+        print("Num files: {} ".format(nf), file=flog, end="")
         re_string = r'\d{4,5}'
         #re_string = r'PPMI-Phase2-IR2\.\d+'
         #re_string = r'd+'
         result = re.search(re_string, fname)
         patno = result.group()
-        print(patno + " ", end="")
+        print(patno + " ", file=flog, end="")
         patient_type = find_patno(patno, fregistry)
         if patient_type == CONST_HC:
             print(patno + "," + CODE_HC + ", ", file=fout, end="")
@@ -101,9 +105,9 @@ def main():
             print(patno + ",", file=fout_sporadic, end="")
         else:
             # Hyposmia, LRRK2, GBA and other cases
-            print("")  # add newline to stdout
+            print("", file=flog)  # add newline to logfile
             continue
-        print(patient_type + "\n")
+        print(patient_type + "\n", file=flog)
 
         npat = npat + 1
         fgenes = open(fname)
@@ -120,11 +124,11 @@ def main():
                     print("File not well formed: err 1")
                     exit(-1)
             else:
-                print("", file=fout, end="")
+                print("0", file=fout, end="")
                 if patient_type == CONST_HC:
-                    print("", file=fout_hc, end="")
+                    print("0", file=fout_hc, end="")
                 elif patient_type == CONST_SPORADIC:
-                    print("", file=fout_sporadic, end="")
+                    print("0", file=fout_sporadic, end="")
                 else:
                     print("File not well formed: err 2")
                     exit(-1)
@@ -154,10 +158,12 @@ def main():
         fout.flush()
         fout_sporadic.flush()
         fout_hc.flush()
+        flog.flush()
     fregistry.close()
     fout.close()
     fout_sporadic.close()
     fout_hc.close()
+    flog.close()
     print("\n")
     print("num files: {}".format(nf))
     print("num patients: {}".format(npat))
